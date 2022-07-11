@@ -10,6 +10,11 @@ class DialogueListPage extends StatefulWidget {
 }
 
 class _DialogueListPageState extends State<DialogueListPage> {
+  List _list = [
+    ["첫번째 나와의 대화", "2022.07.11"],
+    ["두번째 나와의 대화", "2022.07.13"],
+    ["세번째 나와의 대화", "2022.07.17"]
+  ];
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -60,16 +65,18 @@ class _DialogueListPageState extends State<DialogueListPage> {
 
   Widget _listView_builder() {
     return ListView.builder(
-        itemCount: 3, itemBuilder: (context, int index) => _listTile());
+        itemCount: 3,
+        itemBuilder: (context, int index) =>
+            _listTile(_list[index][0], _list[index][1]));
   }
 
-  Widget _listTile() {
+  Widget _listTile(String title, String date) {
     return Card(
       child: ListTile(
         onTap: () => print("sdsas"),
         leading: FlutterLogo(),
-        title: Text('One-line with both widgets'),
-        subtitle: Text('Here is a second line'),
+        title: Text(title),
+        subtitle: Text(date),
         trailing: Icon(Icons.more_vert),
       ),
     );

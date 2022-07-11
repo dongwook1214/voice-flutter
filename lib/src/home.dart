@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:voice/provider/provider.dart';
 
 class homePage extends StatefulWidget {
-  String name;
-  homePage({required this.name});
+  String id;
+  homePage({required this.id});
 
   @override
   State<homePage> createState() => _homePageState();
@@ -17,6 +17,7 @@ class homePage extends StatefulWidget {
 class _homePageState extends State<homePage> {
   @override
   Widget build(BuildContext context) {
+    print(widget.id);
     Size size = MediaQuery.of(context).size;
     size = Size(size.width <= 480 ? size.width : 480, size.height);
     return SafeArea(

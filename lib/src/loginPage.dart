@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice/server/loginFunction.dart';
 import 'package:voice/src/home.dart';
 import 'package:voice/src/signUpPage.dart';
 
@@ -132,10 +133,8 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => homePage(name: "김동욱")),
-                (route) => false);
+            loginFunction(
+                _idController.text, _passWordController.text, context);
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

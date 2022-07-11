@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice/server/signUpFunction.dart';
 import 'package:voice/src/home.dart';
 import 'package:voice/src/loginPage.dart';
 
@@ -166,10 +167,8 @@ class _signUpPageState extends State<signUpPage> {
             ),
           ),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => LoginPage()),
-            );
+            signUpWithEmail(
+                _idController.text, _passWordController.text, context);
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
