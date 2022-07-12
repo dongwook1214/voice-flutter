@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class ProfileImage with ChangeNotifier {
-  Image _profileImage = Image(image: AssetImage("asset/images/basicProfile"));
+  late Image _profileImage;
   Image get profileImage => _profileImage;
 
   void callProfileImageFromFirebase() {

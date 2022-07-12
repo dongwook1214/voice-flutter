@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:voice/server/signUpFunction.dart';
 import 'package:voice/src/home.dart';
 import 'package:voice/src/loginPage.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class signUpPage extends StatefulWidget {
   const signUpPage({Key? key}) : super(key: key);
@@ -11,6 +14,8 @@ class signUpPage extends StatefulWidget {
 }
 
 class _signUpPageState extends State<signUpPage> {
+  XFile? _image;
+  final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
@@ -82,14 +87,27 @@ class _signUpPageState extends State<signUpPage> {
         borderRadius: BorderRadius.circular(100),
       ),
       child: FittedBox(
-          child: IconButton(
-        onPressed: () {},
-        icon: Icon(
-          Icons.add_a_photo_outlined,
-          color: Color.fromRGBO(224, 227, 227, 1),
-        ),
-      )),
+        child: _image == null
+            ? IconButton(
+                onPressed: () => _pickImages(),
+                icon: Icon(
+                  Icons.add_a_photo_outlined,
+                  color: Color.fromRGBO(224, 227, 227, 1),
+                ),
+              )
+            : kIsWeb
+                ? Image.network(_image!.path)
+                : Image(image: FileImage(File(_image!.path))),
+      ),
     );
+  }
+
+  Future _pickImages() async {
+    final XFile? pickImage =
+        await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image = pickImage;
+    });
   }
 
   Widget _inputForm(size) {
@@ -167,8 +185,8 @@ class _signUpPageState extends State<signUpPage> {
             ),
           ),
           onPressed: () {
-            signUpWithEmail(
-                _idController.text, _passWordController.text, context);
+            signUpWithEmail(_idController.text, _passWordController.text,
+                _image, _nameController.text, context);
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

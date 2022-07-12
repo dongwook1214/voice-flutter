@@ -5,6 +5,7 @@ import 'package:voice/src/dialogueListPage.dart';
 import 'package:voice/src/talkWithMePage.dart';
 import 'package:provider/provider.dart';
 import 'package:voice/provider/provider.dart';
+import 'package:voice/server/getQuestion.dart';
 
 class homePage extends StatefulWidget {
   String id;
@@ -20,18 +21,20 @@ class _homePageState extends State<homePage> {
     print(widget.id);
     Size size = MediaQuery.of(context).size;
     size = Size(size.width <= 480 ? size.width : 480, size.height);
+    DateTime now = DateTime.now();
+    print("${now.year}.${now.month}.${now.day}");
     return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
-            _backgroundImage(size),
+            _backgroundImage(size, now),
           ],
         ),
       ),
     );
   }
 
-  Widget _backgroundImage(size) {
+  Widget _backgroundImage(size, DateTime now) {
     return Stack(
       children: [
         Container(
@@ -65,12 +68,16 @@ class _homePageState extends State<homePage> {
                                   create: (_) => ProfileImage()),
                               ChangeNotifierProvider(create: (_) => IsPlay()),
                             ],
-                            child: TalkWithMePage(
-                              questionList: [
-                                "오늘 하루는 어땠나요?",
-                                "오늘은 아침밥은 무엇이었나요?",
-                                "오늘의 기분은 어떤가요?"
-                              ],
+                            child: FutureBuilder(
+                              future: getQuestion(widget.id,
+                                  "${now.year}.${now.month}.${now.day}"),
+                              builder: (context, snapshot) => TalkWithMePage(
+                                questionList: [
+                                  "오늘 하루는 어땠나요?",
+                                  "오늘은 아침밥은 무엇이었나요?",
+                                  "오늘의 기분은 어떤가요?"
+                                ],
+                              ),
                             ),
                           ),
                         ),
