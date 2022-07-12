@@ -69,16 +69,18 @@ class _homePageState extends State<homePage> {
                               ChangeNotifierProvider(create: (_) => IsPlay()),
                             ],
                             child: FutureBuilder(
-                              future: getQuestion(widget.id,
-                                  "${now.year}.${now.month}.${now.day}"),
-                              builder: (context, snapshot) => TalkWithMePage(
-                                questionList: [
-                                  "오늘 하루는 어땠나요?",
-                                  "오늘은 아침밥은 무엇이었나요?",
-                                  "오늘의 기분은 어떤가요?"
-                                ],
-                              ),
-                            ),
+                                future: getQuestion(widget.id,
+                                    "${now.year}.${now.month}.${now.day}"),
+                                builder: (context, AsyncSnapshot snapshot) {
+                                  if (snapshot.hasData) {
+                                    return TalkWithMePage(
+                                      questionList: snapshot.data,
+                                    );
+                                  } else {
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  }
+                                }),
                           ),
                         ),
                       );

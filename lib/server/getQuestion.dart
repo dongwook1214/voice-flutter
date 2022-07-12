@@ -1,15 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-Future<List> getQuestion(String id, String date) async {
-  List<String> list = [];
+Future<List<String>> getQuestion(String id, String date) async {
+  List<String> todayData = [];
   CollectionReference ref =
       FirebaseFirestore.instance.collection("id/" + id + "/question");
 
-  DocumentSnapshot documentSnapshot = await ref.doc(date).get();
-  var data = await documentSnapshot.data();
+  QuerySnapshot querySnapshot = await ref.get();
+  List allData = querySnapshot.docs.map((doc) => doc.data()).toList();
 
-  print(data);
-
-  return list;
+  for (int i = 0; i < allData.length; i++) {
+    if (allData[i]["date"] == date) {
+      int j = 1;
+      while (allData[i][j.toString()] != null) {
+        todayData.add(allData[i][j.toString()]);
+        j++;
+      }
+      break;
+    }
+  }
+  print(todayData);
+  return todayData;
 }
