@@ -75,6 +75,7 @@ class _homePageState extends State<homePage> {
                                   if (snapshot.hasData) {
                                     return TalkWithMePage(
                                       questionList: snapshot.data,
+                                      email: widget.id,
                                     );
                                   } else {
                                     return Center(

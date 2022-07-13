@@ -1,5 +1,6 @@
 import 'dart:async';
-
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -7,16 +8,33 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 import 'package:voice/provider/provider.dart';
 import 'package:voice/src/dialoguePage.dart';
+import 'package:record/record.dart';
+import 'package:microphone/microphone.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:voice/server/recordServer.dart';
 
 class TalkWithMePage extends StatefulWidget {
   List<String> questionList;
-  TalkWithMePage({required this.questionList});
+  String email;
+  TalkWithMePage({required this.questionList, required this.email});
 
   @override
   State<TalkWithMePage> createState() => _TalkWithMePageState();
 }
 
 class _TalkWithMePageState extends State<TalkWithMePage> {
+  late MicrophoneRecorder _microphoneRecorder;
+  DateTime now = DateTime.now();
+  int qindex = 0;
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      _microphoneRecorder = MicrophoneRecorder()..init();
+    }
+  }
+
+  final record = Record();
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -91,7 +109,9 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
   }
 
   Widget _recordIcon() {
-    if (Provider.of<QuestionIndex>(context).questionIndex == -1) {
+    bool isFirstQuestion =
+        Provider.of<QuestionIndex>(context).questionIndex == -1;
+    if (isFirstQuestion) {
       return SizedBox(
         height: 50,
         width: 130,
@@ -113,12 +133,15 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
         ),
       );
     } else {
+      bool isLastQuestion = context.read<QuestionIndex>().questionIndex ==
+          widget.questionList.length - 1;
+
       return IconButton(
-        onPressed: () {
+        onPressed: () async {
           context.read<IsPlay>().change();
           if (context.read<IsPlay>().isPlay == false) {
-            if (context.read<QuestionIndex>().questionIndex ==
-                widget.questionList.length - 1) {
+            await _audioServerFunction();
+            if (isLastQuestion) {
               Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -132,6 +155,8 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
             } else {
               Provider.of<QuestionIndex>(context, listen: false).add();
             }
+          } else {
+            kIsWeb ? _recordStartWeb() : _recordStartAndroid();
           }
         },
         icon: context.watch<IsPlay>().isPlay
@@ -140,5 +165,50 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
         iconSize: 100,
       );
     }
+  }
+
+  Future<void> _audioServerFunction() async {
+    if (kIsWeb) {
+      var value = await _recordStopWeb();
+      await uploadRecordFileWeb(value, widget.email,
+          "${now.year}.${now.month}.${now.day}", "question ${qindex}");
+      _microphoneRecorder.dispose();
+      print("dispose");
+    } else {
+      var value = await _recordStopAndroid();
+      await uploadRecordFileAndrodid(value, widget.email,
+          "${now.year}.${now.month}.${now.day}", "question ${qindex}");
+    }
+    qindex++;
+  }
+
+  void _recordStartAndroid() async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    if (await record.hasPermission()) {
+      await record.start(
+        path: '$tempPath/${DateTime.now().millisecondsSinceEpoch}',
+        encoder: AudioEncoder.aacLc,
+        bitRate: 128000,
+        samplingRate: 44100,
+      );
+    }
+    print("start");
+  }
+
+  Future<String> _recordStopAndroid() async {
+    var path = await record.stop();
+    print("stop");
+    return path.toString();
+  }
+
+  Future<void> _recordStartWeb() async {
+    await _microphoneRecorder.start();
+  }
+
+  Future _recordStopWeb() async {
+    await _microphoneRecorder.stop();
+    var bytesData = await _microphoneRecorder.toBytes();
+    return bytesData;
   }
 }

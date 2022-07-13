@@ -310,6 +310,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  microphone:
+    dependency: "direct main"
+    description:
+      name: microphone
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
+  microphone_platform_interface:
+    dependency: transitive
+    description:
+      name: microphone_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0+1"
+  microphone_web:
+    dependency: transitive
+    description:
+      name: microphone_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.0"
   nested:
     dependency: transitive
     description:
@@ -325,7 +346,7 @@ packages:
     source: hosted
     version: "1.8.1"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"
