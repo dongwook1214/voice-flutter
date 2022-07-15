@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,13 +24,13 @@ Future<void> uploadRecordFileAndrodid(
   try {
     await users.doc(date).update({fieldName: link});
   } catch (e) {
-    await users.doc(date).set({fieldName: link});
+    await users.doc(date).set({"date": date, fieldName: link});
   }
   print("${link} ${fieldName} success");
 }
 
 Future<void> uploadRecordFileWeb(
-    bytesData, String email, String date, String fieldName) async {
+    Uint8List bytesData, String email, String date, String fieldName) async {
   String audioID = const Uuid().v4();
   final storageRef = FirebaseStorage.instance.ref("audio/" + audioID);
   await storageRef.putData(
@@ -40,7 +42,12 @@ Future<void> uploadRecordFileWeb(
   String link = await _downloadURLExample("audio/" + audioID);
   CollectionReference users =
       FirebaseFirestore.instance.collection("id/${email}/answer");
-  await users.doc(date).set({fieldName: link});
+
+  try {
+    await users.doc(date).update({fieldName: link});
+  } catch (e) {
+    await users.doc(date).set({fieldName: link});
+  }
 }
 
 Future<String> _downloadURLExample(String filePath) async {

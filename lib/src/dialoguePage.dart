@@ -5,10 +5,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:voice/provider/provider.dart';
-import 'package:provider/provider.dart';
 import 'package:voice/provider/provider.dart';
-
-int _index = 1;
 
 class DialoguePage extends StatefulWidget {
   List<String> questionList;
@@ -18,13 +15,7 @@ class DialoguePage extends StatefulWidget {
 }
 
 class _DialoguePageState extends State<DialoguePage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<Timers>().start();
-    });
-  }
+  int _index = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +72,7 @@ class _DialoguePageState extends State<DialoguePage> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       "녹음하려면 누르세요.",
                       style: TextStyle(
@@ -97,8 +88,9 @@ class _DialoguePageState extends State<DialoguePage> {
               ),
               IconButton(
                 onPressed: () {
-                  _index++;
-                  setState(() {});
+                  setState(() {
+                    _index++;
+                  });
                 },
                 icon: const Icon(
                   Icons.send,
@@ -133,7 +125,7 @@ class _DialoguePageState extends State<DialoguePage> {
         BubbleNormalAudio(
           color: Color(0xFFE8E8EE),
           duration: duration,
-          position: context.watch<Timers>().time,
+          position: 3,
           isPlaying: false,
           isLoading: false,
           isPause: true,

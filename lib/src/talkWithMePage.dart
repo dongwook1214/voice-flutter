@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -12,6 +13,7 @@ import 'package:record/record.dart';
 import 'package:microphone/microphone.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:voice/server/recordServer.dart';
+import 'package:voice/src/recordReadyPage.dart';
 
 class TalkWithMePage extends StatefulWidget {
   List<String> questionList;
@@ -29,9 +31,6 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      _microphoneRecorder = MicrophoneRecorder()..init();
-    }
   }
 
   final record = Record();
@@ -140,18 +139,18 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
         onPressed: () async {
           context.read<IsPlay>().change();
           if (context.read<IsPlay>().isPlay == false) {
-            await _audioServerFunction();
+            Future asyncFunction = _audioServerFunction();
             if (isLastQuestion) {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => MultiProvider(
-                              providers: [
-                                ChangeNotifierProvider(create: (_) => Timers())
-                              ],
-                              builder: (context, child) => DialoguePage(
-                                    questionList: widget.questionList,
-                                  ))));
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecordReadyPage(
+                    questionList: widget.questionList,
+                    asyncFunction: asyncFunction,
+                    email: widget.email,
+                  ),
+                ),
+              );
             } else {
               Provider.of<QuestionIndex>(context, listen: false).add();
             }
@@ -169,11 +168,10 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
 
   Future<void> _audioServerFunction() async {
     if (kIsWeb) {
-      var value = await _recordStopWeb();
+      Uint8List value = await _recordStopWeb();
       await uploadRecordFileWeb(value, widget.email,
           "${now.year}.${now.month}.${now.day}", "question ${qindex}");
       _microphoneRecorder.dispose();
-      print("dispose");
     } else {
       var value = await _recordStopAndroid();
       await uploadRecordFileAndrodid(value, widget.email,
@@ -203,12 +201,14 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
   }
 
   Future<void> _recordStartWeb() async {
+    _microphoneRecorder = MicrophoneRecorder();
+    await _microphoneRecorder.init();
     await _microphoneRecorder.start();
   }
 
-  Future _recordStopWeb() async {
+  Future<Uint8List> _recordStopWeb() async {
     await _microphoneRecorder.stop();
-    var bytesData = await _microphoneRecorder.toBytes();
+    Uint8List bytesData = await _microphoneRecorder.toBytes();
     return bytesData;
   }
 }

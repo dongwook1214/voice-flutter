@@ -27,6 +27,8 @@ Future loginFunction(id, password, context) async {
     } else if (e.code == 'unknown') {
       _showSnackBar(context, "아이디와 비밀번호를 적어주세요.");
       print('unknown');
+    } else {
+      _showSnackBar(context, "error");
     }
   }
 }
