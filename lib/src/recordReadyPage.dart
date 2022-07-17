@@ -20,7 +20,7 @@ class RecordReadyPage extends StatefulWidget {
 }
 
 class _RecordReadyPageState extends State<RecordReadyPage> {
-  Map<String, String>? questionRecordURLMap;
+  List<String>? questionRecordURLList;
   bool isReady = false;
 
   @override
@@ -28,7 +28,7 @@ class _RecordReadyPageState extends State<RecordReadyPage> {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     await widget.asyncFunction;
-    questionRecordURLMap = await getQuestionRecord(widget.email);
+    questionRecordURLList = await getQuestionRecord(widget.email);
     setState(() {
       isReady = true;
     });
@@ -116,6 +116,8 @@ class _RecordReadyPageState extends State<RecordReadyPage> {
                 MaterialPageRoute(
                     builder: (_) => DialoguePage(
                           questionList: widget.questionList,
+                          questionRecordURLList: questionRecordURLList,
+                          email: widget.email,
                         )));
           },
           child: const Text(

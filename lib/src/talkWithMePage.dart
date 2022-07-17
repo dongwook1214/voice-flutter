@@ -3,17 +3,15 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:provider/provider.dart';
 import 'package:voice/provider/provider.dart';
-import 'package:voice/src/dialoguePage.dart';
 import 'package:record/record.dart';
 import 'package:microphone/microphone.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:voice/server/recordServer.dart';
 import 'package:voice/src/recordReadyPage.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class TalkWithMePage extends StatefulWidget {
   List<String> questionList;
@@ -121,7 +119,7 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
               borderRadius: BorderRadius.circular(50),
             ),
           ),
-          onPressed: () {
+          onPressed: () async {
             context.read<QuestionIndex>().add();
           },
           child: const Text(
@@ -201,14 +199,23 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
   }
 
   Future<void> _recordStartWeb() async {
-    _microphoneRecorder = MicrophoneRecorder();
-    await _microphoneRecorder.init();
-    await _microphoneRecorder.start();
+    try {
+      _microphoneRecorder = MicrophoneRecorder();
+      await _microphoneRecorder.init();
+      await _microphoneRecorder.start();
+    } catch (e) {
+      _showSnackBar(context, e.toString());
+    }
   }
 
   Future<Uint8List> _recordStopWeb() async {
     await _microphoneRecorder.stop();
     Uint8List bytesData = await _microphoneRecorder.toBytes();
     return bytesData;
+  }
+
+  void _showSnackBar(context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

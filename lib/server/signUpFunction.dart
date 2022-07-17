@@ -16,7 +16,7 @@ void signUpWithEmail(
     if (result.user != null) {
       result.user!.sendEmailVerification();
     }
-    await _setProfile(image, email, name);
+    _setProfile(image, email, name);
 
     Navigator.pop(context);
     _showSnackBar(context, "계정이 잘 생성됐습니다!");
@@ -30,13 +30,26 @@ Future<void> _setProfile(XFile? image, String email, String name) async {
   String _fileID = const Uuid().v4();
   Reference ref = FirebaseStorage.instance.ref('proFileImage/' + _fileID);
   if (image == null) {
-    ref.putData((await rootBundle.load("asset/images/basicProfile"))
-        .buffer
-        .asUint8List());
+    ref.putData(
+      (await rootBundle.load("asset/images/basicProfile")).buffer.asUint8List(),
+      SettableMetadata(
+        contentType: "image/jpeg",
+      ),
+    );
   } else {
     kIsWeb
-        ? await ref.putData(await image.readAsBytes())
-        : await ref.putFile(File(image.path));
+        ? await ref.putData(
+            await image.readAsBytes(),
+            SettableMetadata(
+              contentType: "image/jpeg",
+            ),
+          )
+        : await ref.putFile(
+            File(image.path),
+            SettableMetadata(
+              contentType: "image/jpeg",
+            ),
+          );
   }
 
   String _fileURL = await _downloadURLExample('proFileImage/' + _fileID);

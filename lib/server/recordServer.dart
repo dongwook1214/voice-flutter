@@ -56,3 +56,9 @@ Future<String> _downloadURLExample(String filePath) async {
 
   return downloadURL;
 }
+
+Future<void> setTitle(String email, String date, String title) async {
+  CollectionReference users =
+      FirebaseFirestore.instance.collection("id/${email}/answer");
+  await users.doc(date).update({"title": title});
+}
