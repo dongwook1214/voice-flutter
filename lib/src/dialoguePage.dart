@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
+//import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -18,18 +19,23 @@ import 'package:microphone/microphone.dart';
 import '../server/recordServer.dart';
 
 class DialoguePage extends StatefulWidget {
+  Image profile;
   List<String> questionList;
   List<String>? questionRecordURLList;
   String email;
-  DialoguePage(
-      {required this.questionList,
-      required this.questionRecordURLList,
-      required this.email});
+  DialoguePage({
+    required this.questionList,
+    required this.questionRecordURLList,
+    required this.email,
+    required this.profile,
+  });
   @override
   State<DialoguePage> createState() => _DialoguePageState();
 }
 
 class _DialoguePageState extends State<DialoguePage> {
+  bool buildFirst = true;
+  Duration? duration;
   late AudioPlayer audio;
   int _answerIndex = 0;
   int _audioIndex = 0;
@@ -40,14 +46,19 @@ class _DialoguePageState extends State<DialoguePage> {
   final TextEditingController _textController = TextEditingController();
   late MicrophoneRecorder _microphoneRecorder;
   final record = Record();
+
   @override
   void didChangeDependencies() async {
     print(widget.questionList);
     print(widget.questionRecordURLList);
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    audio = AudioPlayer();
-    await audio.play(UrlSource(widget.questionRecordURLList![_audioIndex]));
+    if (buildFirst) {
+      audio = AudioPlayer();
+      duration = await audio.setUrl(widget.questionRecordURLList![_audioIndex]);
+      await audio.play();
+    }
+    buildFirst = false;
   }
 
   @override
@@ -152,8 +163,9 @@ class _DialoguePageState extends State<DialoguePage> {
                             setState(() {
                               _index++;
                             });
-                            await audio.play(UrlSource(
-                                widget.questionRecordURLList![_audioIndex]));
+                            duration = await audio.setUrl(
+                                widget.questionRecordURLList![_audioIndex]);
+                            await audio.play();
                           }
                           if (_index == widget.questionList.length * 2) {
                             _displayDialog();
@@ -254,8 +266,22 @@ class _DialoguePageState extends State<DialoguePage> {
   }
 
   Widget _notSenderMessage(String content) {
-    return Column(
+    return Row(
       children: [
+        Container(
+          width: 5,
+        ),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              fit: BoxFit.fill,
+              image: widget.profile.image,
+            ),
+          ),
+        ),
         BubbleSpecialThree(
           text: content,
           color: Color(0xFFE8E8EE),

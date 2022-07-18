@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
                     constraints: const BoxConstraints(maxWidth: 480),
                     child: MaterialApp(
                       debugShowCheckedModeBanner: false,
-                      title: 'Flutter Demo',
+                      title: 'voice',
                       theme: ThemeData(
                         colorScheme: ColorScheme.fromSeed(
                           seedColor: Colors.white,

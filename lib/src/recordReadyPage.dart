@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:voice/server/getProfileImage.dart';
 
 import '../server/getQuestionRecord.dart';
 import 'dialoguePage.dart';
@@ -114,10 +115,22 @@ class _RecordReadyPageState extends State<RecordReadyPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => DialoguePage(
-                          questionList: widget.questionList,
-                          questionRecordURLList: questionRecordURLList,
-                          email: widget.email,
+                    builder: (_) => FutureBuilder(
+                          future: getProfileImage(widget.email),
+                          builder: (context, AsyncSnapshot snapshot) {
+                            if (snapshot.hasData) {
+                              return DialoguePage(
+                                questionList: widget.questionList,
+                                questionRecordURLList: questionRecordURLList,
+                                email: widget.email,
+                                profile: Image(
+                                  image: NetworkImage(snapshot.data),
+                                ),
+                              );
+                            } else {
+                              return Center(child: CircularProgressIndicator());
+                            }
+                          },
                         )));
           },
           child: const Text(
