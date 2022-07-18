@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:voice/provider/provider.dart';
 import 'package:voice/server/getQuestion.dart';
 
+import '../server/getAllDialogue.dart';
+
 class homePage extends StatefulWidget {
   String id;
   homePage({required this.id});
@@ -57,34 +59,38 @@ class _homePageState extends State<homePage> {
                   padding: const EdgeInsets.only(left: 20, right: 20),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MultiProvider(
-                            providers: [
-                              ChangeNotifierProvider(
-                                  create: (_) => QuestionIndex()),
-                              ChangeNotifierProvider(
-                                  create: (_) => ProfileImage()),
-                              ChangeNotifierProvider(create: (_) => IsPlay()),
-                            ],
-                            child: FutureBuilder(
-                                future: getQuestion(widget.id,
-                                    "${now.year}.${now.month}.${now.day}"),
-                                builder: (context, AsyncSnapshot snapshot) {
-                                  if (snapshot.hasData) {
-                                    return TalkWithMePage(
-                                      questionList: snapshot.data,
-                                      email: widget.id,
-                                    );
-                                  } else {
-                                    return Center(
-                                        child: CircularProgressIndicator());
-                                  }
-                                }),
+                      try {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider(
+                                    create: (_) => QuestionIndex()),
+                                ChangeNotifierProvider(
+                                    create: (_) => ProfileImage()),
+                                ChangeNotifierProvider(create: (_) => IsPlay()),
+                              ],
+                              child: FutureBuilder(
+                                  future: getQuestion(widget.id,
+                                      "${now.year}.${now.month}.${now.day}"),
+                                  builder: (context, AsyncSnapshot snapshot) {
+                                    if (snapshot.hasData) {
+                                      return TalkWithMePage(
+                                        questionList: snapshot.data,
+                                        email: widget.id,
+                                      );
+                                    } else {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    }
+                                  }),
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } catch (e) {
+                        print("dont exist");
+                      }
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -130,7 +136,19 @@ class _homePageState extends State<homePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => DialogueListPage()));
+                              builder: (_) => FutureBuilder(
+                                  future: getAllDialogue(widget.id),
+                                  builder: (context, AsyncSnapshot snapshot) {
+                                    if (snapshot.hasData) {
+                                      return DialogueListPage(
+                                        email: widget.id,
+                                        allDialogue: snapshot.data,
+                                      );
+                                    } else {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    }
+                                  })));
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

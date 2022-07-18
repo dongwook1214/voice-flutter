@@ -46,7 +46,7 @@ Future<void> uploadRecordFileWeb(
   try {
     await users.doc(date).update({fieldName: link});
   } catch (e) {
-    await users.doc(date).set({fieldName: link});
+    await users.doc(date).set({"date": date, fieldName: link});
   }
 }
 

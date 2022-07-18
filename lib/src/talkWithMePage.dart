@@ -1,4 +1,5 @@
 import 'dart:async';
+//import 'dart:html';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
@@ -29,6 +30,7 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
   @override
   void initState() {
     super.initState();
+    // window.navigator.getUserMedia(audio: true);
   }
 
   final record = Record();
@@ -120,7 +122,12 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
             ),
           ),
           onPressed: () async {
-            context.read<QuestionIndex>().add();
+            if (widget.questionList.isEmpty) {
+              Navigator.pop(context);
+              _showSnackBar(context, "오늘은 대화할 수 없습니다.");
+            } else {
+              context.read<QuestionIndex>().add();
+            }
           },
           child: const Text(
             "준비됐나요?",
@@ -169,7 +176,6 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
       Uint8List value = await _recordStopWeb();
       await uploadRecordFileWeb(value, widget.email,
           "${now.year}.${now.month}.${now.day}", "question ${qindex}");
-      _microphoneRecorder.dispose();
     } else {
       var value = await _recordStopAndroid();
       await uploadRecordFileAndrodid(value, widget.email,

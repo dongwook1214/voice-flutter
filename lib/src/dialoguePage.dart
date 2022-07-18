@@ -32,8 +32,10 @@ class DialoguePage extends StatefulWidget {
 class _DialoguePageState extends State<DialoguePage> {
   late AudioPlayer audio;
   int _answerIndex = 0;
+  int _audioIndex = 0;
   int _index = 1;
   bool _isrecording = false;
+  bool _isSendPossible = false;
   DateTime now = DateTime.now();
   final TextEditingController _textController = TextEditingController();
   late MicrophoneRecorder _microphoneRecorder;
@@ -45,7 +47,7 @@ class _DialoguePageState extends State<DialoguePage> {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     audio = AudioPlayer();
-    await audio.play(UrlSource(widget.questionRecordURLList![0]));
+    await audio.play(UrlSource(widget.questionRecordURLList![_audioIndex]));
   }
 
   @override
@@ -81,7 +83,7 @@ class _DialoguePageState extends State<DialoguePage> {
           if (index % 2 == 0) {
             return _notSenderMessage(widget.questionList[index ~/ 2]);
           } else {
-            return _senderMessage("ㅎㅇㅎㅇ");
+            return _senderMessage();
           }
         });
   }
@@ -133,24 +135,42 @@ class _DialoguePageState extends State<DialoguePage> {
                 Container(
                   width: 10,
                 ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_index == widget.questionList.length * 2 - 1) {
-                        _index++;
-                      } else {
-                        _index = _index + 2;
-                      }
-                    });
-                    if (_index == widget.questionList.length * 2) {
-                      _displayDialog();
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.send,
-                    color: Colors.blue,
-                  ),
-                )
+                _isSendPossible
+                    ? IconButton(
+                        onPressed: () async {
+                          if (_index == widget.questionList.length * 2 - 1) {
+                            setState(() {
+                              _index++;
+                            });
+                          } else {
+                            _audioIndex++;
+                            setState(() {
+                              _index++;
+                              _isSendPossible = false;
+                            });
+                            await Future.delayed(Duration(seconds: 1));
+                            setState(() {
+                              _index++;
+                            });
+                            await audio.play(UrlSource(
+                                widget.questionRecordURLList![_audioIndex]));
+                          }
+                          if (_index == widget.questionList.length * 2) {
+                            _displayDialog();
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.send,
+                          color: Colors.blue,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.send,
+                          color: Colors.brown,
+                        ),
+                      )
               ],
             ),
           ),
@@ -174,12 +194,11 @@ class _DialoguePageState extends State<DialoguePage> {
   Future<void> _recordingStopFunction() async {
     if (kIsWeb) {
       Uint8List value = await _recordStopWeb();
-      await uploadRecordFileWeb(value, widget.email,
+      uploadRecordFileWeb(value, widget.email,
           "${now.year}.${now.month}.${now.day}", "answer ${_answerIndex}");
-      _microphoneRecorder.dispose();
     } else {
       var value = await _recordStopAndroid();
-      await uploadRecordFileAndrodid(value, widget.email,
+      uploadRecordFileAndrodid(value, widget.email,
           "${now.year}.${now.month}.${now.day}", "answer ${_answerIndex}");
     }
 
@@ -187,6 +206,7 @@ class _DialoguePageState extends State<DialoguePage> {
 
     setState(() {
       _isrecording = false;
+      _isSendPossible = true;
     });
   }
 
@@ -222,12 +242,14 @@ class _DialoguePageState extends State<DialoguePage> {
     return bytesData;
   }
 
-  Widget _senderMessage(String content) {
-    return BubbleSpecialThree(
-      text: content,
-      color: Color(0xFF1B97F3),
-      tail: false,
-      textStyle: TextStyle(color: Colors.white, fontSize: 16),
+  Widget _senderMessage() {
+    return BubbleNormalAudio(
+      color: Color(0xFFE8E8EE),
+      duration: 1,
+      position: 1,
+      isSender: true,
+      onPlayPauseButtonClick: () {},
+      onSeekChanged: (double value) {},
     );
   }
 

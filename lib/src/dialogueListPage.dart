@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:voice/src/repeatDialogueReadyPage.dart';
+
+import '../server/getName.dart';
 
 class DialogueListPage extends StatefulWidget {
-  const DialogueListPage({Key? key}) : super(key: key);
+  String email;
+  List allDialogue;
+  DialogueListPage({required this.email, required this.allDialogue});
 
   @override
   State<DialogueListPage> createState() => _DialogueListPageState();
 }
 
 class _DialogueListPageState extends State<DialogueListPage> {
-  List _list = [
-    ["첫번째 나와의 대화", "2022.07.11"],
-    ["두번째 나와의 대화", "2022.07.13"],
-    ["세번째 나와의 대화", "2022.07.17"]
-  ];
   @override
   Widget build(BuildContext context) {
+    print(widget.allDialogue);
     Size size = MediaQuery.of(context).size;
     size = Size(size.width <= 480 ? size.width : 480, size.height);
     return SafeArea(
@@ -65,16 +66,36 @@ class _DialogueListPageState extends State<DialogueListPage> {
 
   Widget _listView_builder() {
     return ListView.builder(
-        itemCount: 3,
-        itemBuilder: (context, int index) =>
-            _listTile(_list[index][0], _list[index][1]));
+        itemCount: widget.allDialogue.length,
+        itemBuilder: (context, int index) => _listTile(
+              widget.allDialogue[index]["title"],
+              widget.allDialogue[index]["date"],
+              index,
+            ));
   }
 
-  Widget _listTile(String title, String date) {
+  Widget _listTile(String title, String date, int i) {
     return Card(
       child: ListTile(
-        onTap: () => print("sdsas"),
-        leading: FlutterLogo(),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FutureBuilder(
+                future: getName(widget.email),
+                builder: (context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    return ReapeatDialogueReadyPage(
+                        dialogueAtDay: widget.allDialogue[i],
+                        name: snapshot.data);
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ),
+          );
+        },
         title: Text(title),
         subtitle: Text(date),
         trailing: Icon(Icons.more_vert),
