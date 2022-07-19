@@ -5,6 +5,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'dart:math' as math;
 import 'package:just_audio/just_audio.dart';
+import 'package:universal_html/html.dart' as html;
 
 class ReapeatDialogueReadyPage extends StatefulWidget {
   String name;
@@ -18,7 +19,21 @@ class ReapeatDialogueReadyPage extends StatefulWidget {
 
 class _ReapeatDialogueReadyPageState extends State<ReapeatDialogueReadyPage> {
   bool isCanFinish = false;
-  late AudioPlayer audio;
+  late AudioPlayer audiop;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _getUserMedia();
+  }
+
+  _getUserMedia() async {
+    //var stream = await html.window.navigator.getUserMedia(audio: true);
+    await html.window.navigator.mediaDevices!.getUserMedia({"audio": true});
+    //var permission = await html.window.navigator.permissions!.query({'name': 'microphone'});
+  }
+
   @override
   void didChangeDependencies() async {
     // TODO: implement didChangeDependencies
@@ -26,17 +41,19 @@ class _ReapeatDialogueReadyPageState extends State<ReapeatDialogueReadyPage> {
     Duration? duration;
     int index = 0;
     while (widget.dialogueAtDay.containsKey("answer ${index}") != false) {
-      audio = AudioPlayer();
-      duration = await audio.setUrl(widget.dialogueAtDay["question $index"]);
-      await audio.play();
-      while (audio.processingState != ProcessingState.completed) {
+      audiop = AudioPlayer();
+      duration = await audiop.setUrl(widget.dialogueAtDay["question $index"]);
+
+      await audiop.play();
+
+      while (audiop.processingState != ProcessingState.completed) {
         await Future.delayed(Duration(seconds: 1));
       }
 
-      audio = AudioPlayer();
-      duration = await audio.setUrl(widget.dialogueAtDay["answer $index"]);
-      await audio.play();
-      while (audio.processingState != ProcessingState.completed) {
+      audiop = AudioPlayer();
+      duration = await audiop.setUrl(widget.dialogueAtDay["answer $index"]);
+      await audiop.play();
+      while (audiop.processingState != ProcessingState.completed) {
         await Future.delayed(Duration(seconds: 1));
       }
       index++;

@@ -1,5 +1,5 @@
 import 'dart:async';
-//import 'dart:html';
+import 'package:universal_html/html.dart' as html;
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
@@ -27,10 +27,23 @@ class _TalkWithMePageState extends State<TalkWithMePage> {
   late MicrophoneRecorder _microphoneRecorder;
   DateTime now = DateTime.now();
   int qindex = 0;
+
   @override
   void initState() {
     super.initState();
-    // window.navigator.getUserMedia(audio: true);
+
+    try {
+      _getUserMedia();
+    } catch (e) {
+      _showSnackBar(context, e.toString());
+    }
+  }
+
+  _getUserMedia() async {
+    //var stream = await html.window.navigator.getUserMedia(audio: true);
+    await html.window.navigator.mediaDevices!.getUserMedia({"audio": true});
+    // var permission =
+    //     await html.window.navigator.permissions!.query({'name': 'microphone'});
   }
 
   final record = Record();

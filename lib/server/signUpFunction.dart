@@ -11,15 +11,14 @@ import 'package:flutter/services.dart' show rootBundle;
 void signUpWithEmail(
     String email, String password, XFile? image, String name, context) async {
   try {
+    _showSnackBar(context, "계정이 잘 생성됐습니다!");
+    Navigator.pop(context);
     var result = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
     if (result.user != null) {
       result.user!.sendEmailVerification();
     }
     _setProfile(image, email, name);
-
-    Navigator.pop(context);
-    _showSnackBar(context, "계정이 잘 생성됐습니다!");
   } on Exception catch (e) {
     print(e);
     _showSnackBar(context, e.toString());
@@ -30,8 +29,10 @@ Future<void> _setProfile(XFile? image, String email, String name) async {
   String _fileID = const Uuid().v4();
   Reference ref = FirebaseStorage.instance.ref('proFileImage/' + _fileID);
   if (image == null) {
-    ref.putData(
-      (await rootBundle.load("asset/images/basicProfile")).buffer.asUint8List(),
+    await ref.putData(
+      (await rootBundle.load("asset/images/basicProfile.jpeg"))
+          .buffer
+          .asUint8List(),
       SettableMetadata(
         contentType: "image/jpeg",
       ),
