@@ -30,9 +30,13 @@ class _RecordReadyPageState extends State<RecordReadyPage> {
     super.didChangeDependencies();
     await widget.asyncFunction;
     questionRecordURLList = await getQuestionRecord(widget.email);
-    setState(() {
-      isReady = true;
-    });
+    try {
+      setState(() {
+        isReady = true;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override

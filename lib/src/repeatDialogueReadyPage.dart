@@ -20,18 +20,11 @@ class ReapeatDialogueReadyPage extends StatefulWidget {
 class _ReapeatDialogueReadyPageState extends State<ReapeatDialogueReadyPage> {
   bool isCanFinish = false;
   late AudioPlayer audiop;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    _getUserMedia();
-  }
-
-  _getUserMedia() async {
-    //var stream = await html.window.navigator.getUserMedia(audio: true);
-    await html.window.navigator.mediaDevices!.getUserMedia({"audio": true});
-    //var permission = await html.window.navigator.permissions!.query({'name': 'microphone'});
   }
 
   @override
@@ -40,24 +33,30 @@ class _ReapeatDialogueReadyPageState extends State<ReapeatDialogueReadyPage> {
     super.didChangeDependencies();
     Duration? duration;
     int index = 0;
-    while (widget.dialogueAtDay.containsKey("answer ${index}") != false) {
-      audiop = AudioPlayer();
-      duration = await audiop.setUrl(widget.dialogueAtDay["question $index"]);
+    try {
+      while (widget.dialogueAtDay.containsKey("answer ${index}") != false) {
+        audiop = AudioPlayer();
 
-      await audiop.play();
+        duration = await audiop.setUrl(widget.dialogueAtDay["question $index"]);
 
-      while (audiop.processingState != ProcessingState.completed) {
-        await Future.delayed(Duration(seconds: 1));
+        await audiop.play();
+
+        while (audiop.processingState != ProcessingState.completed) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+
+        audiop = AudioPlayer();
+        duration = await audiop.setUrl(widget.dialogueAtDay["answer $index"]);
+        await audiop.play();
+        while (audiop.processingState != ProcessingState.completed) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+        index++;
       }
-
-      audiop = AudioPlayer();
-      duration = await audiop.setUrl(widget.dialogueAtDay["answer $index"]);
-      await audiop.play();
-      while (audiop.processingState != ProcessingState.completed) {
-        await Future.delayed(Duration(seconds: 1));
-      }
-      index++;
+    } catch (e) {
+      _showSnackBar(e.toString());
     }
+
     isCanFinish = true;
   }
 
